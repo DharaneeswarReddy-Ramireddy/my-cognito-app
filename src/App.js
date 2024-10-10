@@ -10,9 +10,11 @@ function App() {
   const [email, setEmail] = useState('');
   const [givenName, setGivenName] = useState('');
   const [familyName, setFamilyName] = useState('');
+  const [confirmationCode, setConfirmationCode] = useState(''); // New state for confirmation code
   const [error, setError] = useState('');
   const [loggedIn, setLoggedIn] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false); // New state for confirmation step
 
   const handleSignUp = async () => {
     try {
@@ -26,8 +28,20 @@ function App() {
         },
       });
       alert('Sign-up successful! Please check your email for confirmation.');
+      setIsConfirming(true); // Move to confirmation step
     } catch (err) {
       setError('Sign-up failed: ' + err.message);
+    }
+  };
+
+  const handleConfirmSignUp = async () => { // New function to handle confirmation
+    try {
+      await Auth.confirmSignUp(username, confirmationCode);
+      alert('Confirmation successful! You can now sign in.');
+      setIsConfirming(false); // Go back to sign-in
+      setIsSignUp(false); // Switch to sign-in view
+    } catch (err) {
+      setError('Confirmation failed: ' + err.message);
     }
   };
 
@@ -88,6 +102,17 @@ function App() {
                 onChange={(e) => setPassword(e.target.value)}
               />
               <button onClick={handleSignUp}>Sign Up</button>
+              {isConfirming && ( // Show confirmation code input if confirming
+                <>
+                  <input
+                    type="text"
+                    placeholder="Confirmation Code"
+                    value={confirmationCode}
+                    onChange={(e) => setConfirmationCode(e.target.value)}
+                  />
+                  <button onClick={handleConfirmSignUp}>Confirm Sign Up</button>
+                </>
+              )}
             </>
           ) : (
             <>
